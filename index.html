@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>좋은 급식, 위대한 급식</title>
+    <title>좋은 급식 위대한 급식</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
@@ -80,7 +80,6 @@
             button.start-btn { flex: 1; margin-top: 0; padding: 0 20px; font-size: 1.8rem; border-radius: 20px; box-shadow: 0 4px 0 #c0392b; }
             button.start-btn:active { transform: translateY(4px); box-shadow: none; }
             
-            /* 💡 수정된 부분: 모바일 가로 모드일 때 쪼그라들던 제목 크기 확대 */
             h1 { margin-top: 5px; margin-bottom: 15px; }
             .title-small { font-size: 1.8rem !important; }
             .title-large { font-size: 2.8rem !important; }
@@ -415,9 +414,9 @@
                     </select>
                     <select id="game-difficulty">
                         <option value="1">🌱 연습 (점수 없음, 1칸 채우기)</option>
-                        <option value="2">⭐ (2칸 채우기)</option>
-                        <option value="3">⭐⭐ (3칸 채우기)</option>
-                        <option value="4">⭐⭐⭐ (4칸 채우기)</option>
+                        <option value="2">⭐ (식품군 힌트, 2칸 채우기)</option>
+                        <option value="3">⭐⭐ (힌트 없음, 3칸 채우기)</option>
+                        <option value="4">⭐⭐⭐ (힌트 없음, 4칸 채우기)</option>
                     </select>
                     <div class="hint-text">모든 식품군이 골고루 들어가도록 식판을 완성하세요!</div>
                 </div>
@@ -733,20 +732,16 @@
             document.getElementById('custom-confirm-modal').classList.add('hidden');
         }
         
-        // 💡 수정된 부분: 페이지 새로고침(Reload) 대신 내부 상태만 초기화하는 SPA 방식 적용
         function confirmHome() {
             closeConfirm();
             
-            // 진행 중인 타이머 정지
             clearInterval(gameState.timerInterval);
 
-            // 열려있는 게임 화면/결과 모달 모두 숨기고 첫 화면 열기
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('eval-modal').classList.add('hidden');
             document.getElementById('intro-screen').classList.remove('hidden');
             
-            // 게임 데이터 초기화 (선생님 이메일, 시트 정보 등은 유지!)
             gameState.round = 1;
             gameState.totalScore = 0;
             gameState.completedRounds = 0;
@@ -754,7 +749,6 @@
             gameState.isSubmitted = false;
             gameState.eventCooldowns = { eco: 0, birthday: 0 };
             
-            // 선생님 제출 버튼 상태 복구
             const submitBtn = document.getElementById('submit-teacher-btn');
             if (submitBtn) {
                 submitBtn.innerText = '선생님께 제출하기';
@@ -778,7 +772,7 @@
                 const email = document.getElementById('teacher-email').value.trim();
                 const emailConfirm = document.getElementById('teacher-email-confirm').value.trim(); 
                 if (!email) { showAlert("이메일 주소를 입력해 주세요!"); return; }
-                if (!emailConfirm) { showAlert("이메일 주소를 한 번 더 입력해 주세요!"); return; }
+                if (!emailConfirm) { showAlert("이메일 주소를 한 일 번 더 입력해 주세요!"); return; }
                 if (email !== emailConfirm) { 
                     showAlert("입력하신 두 이메일 주소가 다릅니다. 오타가 없는지 확인해 주세요!"); 
                     return; 
@@ -839,7 +833,7 @@
         function startGame() {
             const nickname = document.getElementById('player-nickname').value.trim();
             if (!nickname) { showAlert('별명을 입력해주세요!'); return; }
-            
+
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             if (isMobile && !document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(e => console.log(e));
@@ -1025,6 +1019,7 @@
                 const displayGroupStr = getDisplayGroupName(groupStr); 
                 
                 const slotEl = document.getElementById(slotId);
+                // 주어진(잠긴) 메뉴는 난이도 상관없이 항상 식품군 표시 유지
                 slotEl.innerHTML = `🔒 ${dish.name}<br><span style="font-size:0.9rem; color:#2c3e50;">(${displayGroupStr})</span>`;
                 slotEl.classList.add('filled', 'locked');
             });
@@ -1294,7 +1289,14 @@
             const groupStr = FOOD_GROUPS[mainIng] || '분류없음';
             const displayGroupStr = getDisplayGroupName(groupStr); 
             
-            slotEl.innerHTML = `${recipeName}<br><span style="font-size:0.9rem; color:#2c3e50;">(${displayGroupStr})</span>`;
+            let displayHtml = recipeName;
+            
+            // 💡 난이도 1(1칸), 2(2칸)일 때만 식품군 힌트 표시 (slotsToFillByUser가 1 또는 2)
+            if (gameState.slotsToFillByUser <= 2) {
+                displayHtml += `<br><span style="font-size:0.9rem; color:#2c3e50;">(${displayGroupStr})</span>`;
+            }
+            
+            slotEl.innerHTML = displayHtml;
             slotEl.classList.add('filled');
             
             updateMissingGroupHints(); 

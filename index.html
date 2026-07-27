@@ -231,15 +231,58 @@
             100% { transform: scale(1) rotate(-15deg); opacity: 0.85; }
         }
 
-        #dashboard-screen { flex: 1; display: flex; flex-direction: column; width: 100%; height: 100%; background-color: #ffffff; overflow-y: auto; padding: 4% 5%; color: #333; border-radius: 20px; }
-        .report-header { text-align: center; margin-bottom: 2%; border-bottom: 3px solid  #e86868; padding-bottom: 15px; }
-        .report-header h2 { font-size: clamp(1.8rem, 4vh, 2.5rem); color:  #e86868; margin: 0 0 10px 0; letter-spacing: 2px; }
-        .report-header p { font-size: clamp(1.1rem, 2.5vh, 1.4rem); margin: 0; color: #2c3e50; }
-        .dashboard-grid { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
-        .dashboard-column { display: flex; flex-direction: column; gap: 20px; margin-bottom: 20px; }
-        .card { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 15px rgba(0,0,0,0.05); border: 1px solid #e1e8ed; flex: 1; min-width: 250px; }
+#dashboard-screen { flex: 1; display: flex; flex-direction: column; width: 100%; height: 100%; background-color: #ffffff; overflow-y: auto; padding: 4% 5%; color: #333; border-radius: 20px; }
+.report-header { text-align: center; margin-bottom: 2%; border-bottom: 3px solid #e86868; padding-bottom: 15px; }
+.report-header h2 { font-size: clamp(1.8rem, 4vh, 2.5rem); color: #e86868; margin: 0 0 10px 0; letter-spacing: 2px; }
+.report-header p { font-size: clamp(1.1rem, 2.5vh, 1.4rem); margin: 0; color: #2c3e50; }
+
+.dashboard-layout { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+.dashboard-col { display: flex; flex-direction: column; gap: 20px; }
+
+.card { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 15px rgba(0,0,0,0.05); border: 1px solid #e1e8ed; flex: 1; }
+
         .card h3 { margin: 0 0 15px 0; font-size: clamp(1.2rem, 2.8vh, 1.4rem); color: #34495e; border-bottom: 2px dashed #f1f2f6; padding-bottom: 10px; }
         .summary-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: clamp(1rem, 2.5vh, 1.2rem); }
+
+#dashboard-screen.print-mode {
+    width: 1400px !important; 
+    height: auto !important;   
+    min-height: 800px !important; 
+    position: absolute !important; 
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 9999 !important;
+    overflow: visible !important; 
+    padding: 40px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background-color: #fff !important;
+    border-radius: 0 !important;
+}
+
+#dashboard-screen.print-mode .dashboard-layout {
+    flex-direction: row; 
+    flex: 1;
+    gap: 50px;
+    height: 100%;
+}
+
+#dashboard-screen.print-mode .left-col {
+    flex: 0.7 !important; 
+    justify-content: flex-start;
+}
+
+#dashboard-screen.print-mode .right-col {
+    flex: 1.3 !important; 
+    justify-content: flex-start;
+}
+
+#dashboard-screen.print-mode .print-controls { display: none !important; }
+#dashboard-screen.print-mode .card { padding: 20px; box-shadow: none; border: 2px solid #e1e8ed; }
+#dashboard-screen.print-mode .report-header { margin-bottom: 20px; padding-bottom: 15px; }
+#dashboard-screen.print-mode .heart-rating-container { padding: 10px; margin-bottom: 10px; }
+#dashboard-screen.print-mode .reflection-area textarea, 
+#dashboard-screen.print-mode .reflection-area input[type="text"] { height: 60px; padding: 10px; font-size: 1.05rem; }
 
         .stat-item { background: transparent; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #e1e8ed; }
         .stat-value { font-size: clamp(1.3rem, 3.2vh, 1.6rem); color: #57A1DE; margin-top: 5px; }
@@ -538,89 +581,95 @@
             </div>
         </div>
 
-        <div id="dashboard-screen" class="hidden">
-            <div class="report-header">
-                <h2>📋 급식 일일 운영 보고서</h2>
-                <p>👨‍🍳 담당 영양사: <span id="dash-name"></span></p>
-            </div>
-            
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>🏆 종합 업무 요약</h3>
-                    <div class="summary-stats">
-                        <div class="stat-item">도전 난이도<div class="stat-value" id="dash-difficulty">⭐</div></div>
-                        <div class="stat-item">배식 완료 횟수<div class="stat-value"><span id="dash-rounds">0</span>번</div></div>
-                        <div class="stat-item">총 획득 점수<div class="stat-value"><span id="dash-score">0</span>점</div></div>
-                        <div class="stat-item">업무 소요 시간<div class="stat-value"><span id="dash-time">0</span>분</div></div>
-                        <div class="stat-item" style="grid-column: 1 / 3;">부여된 칭호<div class="stat-value" id="dash-title" style="color:#ffa502;">견습 영양사</div></div>
-                    </div>
-                    <div id="final-rank-stamp" class="final-stamp hidden">S+</div>
+        <!-- --- [수정할 HTML 덩어리: id="dashboard-screen" 내부 전체 교체] --- -->
+<div id="dashboard-screen" class="hidden">
+    <div class="report-header">
+        <h2>📋 급식 일일 운영 보고서</h2>
+        <p>👨‍🍳 담당 영양사: <span id="dash-name"></span></p>
+    </div>
+    
+    <!-- 💡 여기서부터 컨테이너를 두 개(좌/우)로 나눕니다 -->
+    <div class="dashboard-layout">
+        
+        <!-- 1단 (좌측 컨테이너) -->
+        <div class="dashboard-col left-col">
+            <div class="card">
+                <h3>🏆 종합 업무 요약</h3>
+                <div class="summary-stats">
+                    <div class="stat-item">도전 난이도<div class="stat-value" id="dash-difficulty">⭐</div></div>
+                    <div class="stat-item">배식 완료 횟수<div class="stat-value"><span id="dash-rounds">0</span>번</div></div>
+                    <div class="stat-item">총 획득 점수<div class="stat-value"><span id="dash-score">0</span>점</div></div>
+                    <div class="stat-item">업무 소요 시간<div class="stat-value"><span id="dash-time">0</span>분</div></div>
+                    <div class="stat-item" style="grid-column: 1 / 3;">부여된 칭호<div class="stat-value" id="dash-title" style="color:#ffa502;">견습 영양사</div></div>
                 </div>
-
-                <div class="card">
-                    <h3>⚖️ 식품구성자전거 밸런스 분석</h3>
-                    <div class="chart-container">
-                        <canvas id="balance-chart"></canvas>
-                    </div>
-                </div>
+                <div id="final-rank-stamp" class="final-stamp hidden">S+</div>
             </div>
 
-            <div class="dashboard-column">
-                <div class="card">
-                    <h3>💡 AI 급식 총평</h3>
-                    <div class="ai-feedback-box" id="dash-ai-insight">
-                        데이터 분석 중...
-                    </div>
+            <div class="card">
+                <h3>⚖️ 식품구성자전거 밸런스 분석</h3>
+                <div class="chart-container">
+                    <canvas id="balance-chart"></canvas>
                 </div>
-
-                <div class="card">
-                    <h3>📝 탐구 및 성찰 리포트</h3>
-                    
-                    <div class="heart-rating-container">
-                        <div class="heart-question">💖 오늘의 활동, 얼마나 열심히 참여했나요?</div>
-                        <div class="hearts" id="heart-group">
-                            <span class="heart" data-value="1">♥</span>
-                            <span class="heart" data-value="2">♥</span>
-                            <span class="heart" data-value="3">♥</span>
-                            <span class="heart" data-value="4">♥</span>
-                            <span class="heart" data-value="5">♥</span>
-                        </div>
-                        <input type="hidden" id="immersion-score" value="0">
-                    </div>
-                    
-                    <div class="eval-section">
-                        <div style="width: 100%; justify-content: center;">
-                            <strong>🧠 개념 이해도:</strong>
-                            <label class="radio-label"><input type="radio" name="understanding" value="완벽 이해"> 🤩 완벽하게 이해했어요!</label>
-                            <label class="radio-label"><input type="radio" name="understanding" value="대체로 이해"> 🙂 어느 정도 이해한 것 같아요</label>
-                            <label class="radio-label"><input type="radio" name="understanding" value="어려움"> 🥺 이해가 어려웠어요</label>
-                        </div>
-                    </div>
-
-                    <div class="reflection-area">
-                        <div class="question-block">
-                            <div class="q-title">Q1. [탐구] 식품군을 고루 섭취하지 않아 특정 영양소가 부족해지면 우리 몸에 어떤 문제가 발생할까요?</div>
-                            <textarea id="q1-text" placeholder="이곳에 자세히 적어보세요."></textarea>
-                        </div>
-                        <div class="question-block">
-                            <div class="q-title">Q2. [성찰] 영양소가 골고루 들어간 '건강 식단'을 직접 조리하기 위해 식재료를 선택할 때, 중요하게 고려해야 할 점은 무엇일까요?</div>
-                            <textarea id="q2-text" placeholder="이곳에 자세히 적어보세요."></textarea>
-                        </div>
-                        <div class="question-block">
-                            <div class="q-title">Q3. [다짐] 건강한 식생활을 실천하기 위한 나의 다짐 한 마디!</div>
-                            <input type="text" id="q3-text" placeholder="이곳에 자세히 적어보세요.">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="print-controls">
-                <button id="submit-teacher-btn" class="action-btn btn-red" onclick="submitToTeacher()">선생님께 제출하기</button>
-                <button class="action-btn btn-blue" onclick="downloadReportPNG()">갤러리에 저장</button>
-                <button class="action-btn btn-white" onclick="askGoHome()">처음으로</button>
             </div>
         </div>
+
+        <!-- 2단 (우측 컨테이너) -->
+        <div class="dashboard-col right-col">
+            <div class="card">
+                <h3>💡 AI 급식 총평</h3>
+                <div class="ai-feedback-box" id="dash-ai-insight">
+                    데이터 분석 중...
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📝 탐구 및 성찰 리포트</h3>
+                <div class="heart-rating-container">
+                    <div class="heart-question">💖 오늘의 활동, 얼마나 열심히 참여했나요?</div>
+                    <div class="hearts" id="heart-group">
+                        <span class="heart" data-value="1">♥</span>
+                        <span class="heart" data-value="2">♥</span>
+                        <span class="heart" data-value="3">♥</span>
+                        <span class="heart" data-value="4">♥</span>
+                        <span class="heart" data-value="5">♥</span>
+                    </div>
+                    <input type="hidden" id="immersion-score" value="0">
+                </div>
+                
+                <div class="eval-section">
+                    <div style="width: 100%; justify-content: center;">
+                        <strong>🧠 개념 이해도:</strong>
+                        <label class="radio-label"><input type="radio" name="understanding" value="완벽 이해"> 🤩 완벽하게 이해했어요!</label>
+                        <label class="radio-label"><input type="radio" name="understanding" value="대체로 이해"> 🙂 어느 정도 이해한 것 같아요</label>
+                        <label class="radio-label"><input type="radio" name="understanding" value="어려움"> 🥺 이해가 어려웠어요</label>
+                    </div>
+                </div>
+
+                <div class="reflection-area">
+                    <div class="question-block">
+                        <div class="q-title">Q1. [탐구] 식품군을 고루 섭취하지 않아 특정 영양소가 부족해지면 우리 몸에 어떤 문제가 발생할까요?</div>
+                        <textarea id="q1-text" placeholder="이곳에 자세히 적어보세요."></textarea>
+                    </div>
+                    <div class="question-block">
+                        <div class="q-title">Q2. [성찰] 영양소가 골고루 들어간 '건강 식단'을 직접 조리하기 위해 식재료를 선택할 때, 중요하게 고려해야 할 점은 무엇일까요?</div>
+                        <textarea id="q2-text" placeholder="이곳에 자세히 적어보세요."></textarea>
+                    </div>
+                    <div class="question-block">
+                        <div class="q-title">Q3. [다짐] 건강한 식생활을 실천하기 위한 나의 다짐 한 마디!</div>
+                        <input type="text" id="q3-text" placeholder="이곳에 자세히 적어보세요.">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
+
+    <div class="print-controls">
+        <button id="submit-teacher-btn" class="action-btn btn-red" onclick="submitToTeacher()">선생님께 제출하기</button>
+        <button class="action-btn btn-blue" onclick="downloadReportPNG()">갤러리에 저장</button>
+        <button class="action-btn btn-white" onclick="askGoHome()">처음으로</button>
+    </div>
+</div>
 
     <script>
         function toggleFullScreen() {
@@ -653,20 +702,22 @@
             return map[groupName] || groupName;
         }
 
-        let gameState = {
-            nickname: '', round: 1, slotsToFillByUser: 5, totalScore: 0,
-            totalTimeLimit: 300, timeLeft: 300, timerInterval: null,
-            currentAllergy: null, bonusIngredient: null, currentEvent: null,
-            trayData: {}, activeSlotId: null, unlockedSlotIds: [],
-            previousUnlockedSlots: null, previousMissingGroups: null,
-            perfectTray: null, slotOptionsCache: {},
-            groupCounts: { '곡류': 0, '고기·생선·달걀·콩류': 0, '채소류': 0, '과일류': 0, '우유·유제품류': 0 },
-            completedRounds: 0,
-            teacherEmail: '',
-            sheetId: '', 
-            isSubmitted: false,
-            eventCooldowns: { eco: 0, birthday: 0 } 
-        };
+let gameState = {
+    nickname: '', round: 1, slotsToFillByUser: 5, totalScore: 0,
+    totalTimeLimit: 300, timeLeft: 300, timerInterval: null,
+    currentAllergy: null, bonusIngredient: null, currentEvent: null,
+    trayData: {}, activeSlotId: null, unlockedSlotIds: [],
+    previousUnlockedSlots: null, previousMissingGroups: null,
+    perfectTray: null, slotOptionsCache: {},
+    groupCounts: { '곡류': 0, '고기·생선·달걀·콩류': 0, '채소류': 0, '과일류': 0, '우유·유제품류': 0 },
+    completedRounds: 0,
+    teacherEmail: '',
+    sheetId: '', 
+    isSubmitted: false,
+    eventCooldowns: { eco: 0, birthday: 0 },
+    avgSpeed: 0, 
+    missedGroupsStr: '' 
+};
 
         function extractSheetId(url) {
             const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
@@ -732,31 +783,42 @@
             document.getElementById('custom-confirm-modal').classList.add('hidden');
         }
         
-        function confirmHome() {
-            closeConfirm();
-            
-            clearInterval(gameState.timerInterval);
+function confirmHome() {
+    closeConfirm();
+    
+    clearInterval(gameState.timerInterval);
 
-            document.getElementById('game-screen').classList.add('hidden');
-            document.getElementById('dashboard-screen').classList.add('hidden');
-            document.getElementById('eval-modal').classList.add('hidden');
-            document.getElementById('intro-screen').classList.remove('hidden');
-            
-            gameState.round = 1;
-            gameState.totalScore = 0;
-            gameState.completedRounds = 0;
-            gameState.groupCounts = { '곡류': 0, '고기·생선·달걀·콩류': 0, '채소류': 0, '과일류': 0, '우유·유제품류': 0 };
-            gameState.isSubmitted = false;
-            gameState.eventCooldowns = { eco: 0, birthday: 0 };
-            
-            const submitBtn = document.getElementById('submit-teacher-btn');
-            if (submitBtn) {
-                submitBtn.innerText = '선생님께 제출하기';
-                submitBtn.style.backgroundColor = '#e86868'; 
-                submitBtn.style.boxShadow = '0 5px 0 #c0392b';
-                submitBtn.disabled = false;
-            }
-        }
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('dashboard-screen').classList.add('hidden');
+    document.getElementById('eval-modal').classList.add('hidden');
+    document.getElementById('intro-screen').classList.remove('hidden');
+
+    gameState.round = 1;
+    gameState.totalScore = 0;
+    gameState.completedRounds = 0;
+    gameState.groupCounts = { '곡류': 0, '고기·생선·달걀·콩류': 0, '채소류': 0, '과일류': 0, '우유·유제품류': 0 };
+    gameState.isSubmitted = false;
+    gameState.eventCooldowns = { eco: 0, birthday: 0 };
+
+    const submitBtn = document.getElementById('submit-teacher-btn');
+    if (submitBtn) {
+        submitBtn.innerText = '선생님께 제출하기';
+        submitBtn.style.backgroundColor = '#e86868'; 
+        submitBtn.style.boxShadow = '0 5px 0 #c0392b';
+        submitBtn.disabled = false;
+    }
+
+    document.getElementById('q1-text').value = '';
+    document.getElementById('q2-text').value = '';
+    document.getElementById('q3-text').value = '';
+
+    const understandingRadios = document.querySelectorAll('input[name="understanding"]');
+    understandingRadios.forEach(radio => radio.checked = false);
+
+    document.getElementById('immersion-score').value = '0';
+    const hearts = document.querySelectorAll('.heart');
+    hearts.forEach(heart => heart.classList.remove('active'));
+}
 
         function openSettings() { document.getElementById('settings-panel').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settings-panel').classList.add('hidden'); }
@@ -998,7 +1060,7 @@
             let npcFaceEmoji = NPC_FACES[Math.floor(Math.random() * NPC_FACES.length)];
 
             if (gameState.currentEvent === 'eco') {
-                npcMsg = `오늘은 <b>'저탄소 친환경 급식의 날'</b>이에요! 🌱<br>모든 메뉴에서 고기를 빼고, <b>두부</b>를 활용한 식단을 구성해보세요!`;
+                npcMsg = `오늘은 <b>'저탄소 친환경 급식의 날'</b>이에요! 🌱<br>모든 메뉴에서 고기/생선/달걀을 빼고, <b>두부</b>를 활용한 식단을 구성해보세요!`;
                 npcFaceEmoji = '🌏';
             } else if (gameState.currentEvent === 'birthday') {
                 npcMsg = `오늘은 제 생일이에요! 🎉<br>생일엔 역시 <b>미역국</b>이 빠질 수 없죠!`;
@@ -1019,7 +1081,6 @@
                 const displayGroupStr = getDisplayGroupName(groupStr); 
                 
                 const slotEl = document.getElementById(slotId);
-                // 주어진(잠긴) 메뉴는 난이도 상관없이 항상 식품군 표시 유지
                 slotEl.innerHTML = `🔒 ${dish.name}<br><span style="font-size:0.9rem; color:#2c3e50;">(${displayGroupStr})</span>`;
                 slotEl.classList.add('filled', 'locked');
             });
@@ -1046,7 +1107,8 @@
                         else if (slotId === 'slot-side1') mains = ['두부'];
                         else mains = mains.filter(m => m !== '두부'); 
                     }
-                    if (gameState.currentEvent === 'birthday' && cat === '국') mains = ['소고기'];
+
+                    if (gameState.currentEvent === 'birthday' && cat === '국') mains = ['미역'];
 
                     if(mains.length === 0) { isValid = false; break; }
                     const main = mains[Math.floor(Math.random() * mains.length)];
@@ -1155,7 +1217,7 @@
                     selectedIngs.push(...shuffled.slice(0, MAX_PER_GROUP));
                 }
                 
-                if (perfectMain && !selectedIngs.includes(perfectMain) && Object.keys(RECIPE_DB[category]).includes(perfectMain)) {
+                                if (perfectMain && !selectedIngs.includes(perfectMain) && Object.keys(RECIPE_DB[category]).includes(perfectMain)) {
                     selectedIngs.push(perfectMain);
                 }
                 if (gameState.bonusIngredient && !selectedIngs.includes(gameState.bonusIngredient) && Object.keys(RECIPE_DB[category]).includes(gameState.bonusIngredient)) {
@@ -1164,8 +1226,9 @@
                 if (gameState.currentEvent === 'eco' && Object.keys(RECIPE_DB[category]).includes('두부') && !selectedIngs.includes('두부')) {
                     selectedIngs.push('두부');
                 }
-                if (gameState.currentEvent === 'birthday' && category === '국' && !selectedIngs.includes('소고기')) {
-                    selectedIngs.push('소고기');
+
+                if (gameState.currentEvent === 'birthday' && category === '국' && !selectedIngs.includes('미역')) {
+                    selectedIngs.push('미역');
                 }
 
                 if (gameState.currentAllergy && Object.keys(RECIPE_DB[category]).includes(gameState.currentAllergy) && !selectedIngs.includes(gameState.currentAllergy)) {
@@ -1290,8 +1353,7 @@
             const displayGroupStr = getDisplayGroupName(groupStr); 
             
             let displayHtml = recipeName;
-            
-            // 💡 난이도 1(1칸), 2(2칸)일 때만 식품군 힌트 표시 (slotsToFillByUser가 1 또는 2)
+
             if (gameState.slotsToFillByUser <= 2) {
                 displayHtml += `<br><span style="font-size:0.9rem; color:#2c3e50;">(${displayGroupStr})</span>`;
             }
@@ -1373,15 +1435,15 @@
                 
                 if (!hasMeat && allUsedIngredients.includes('두부')) {
                     roundScore += 30; 
-                    ruleFeedback.push(`저탄소 친환경 미션 완벽 성공! 고기 없이 [두부]로 든든한 식단을 짰어요! 🌱 (+30점)`);
+                    ruleFeedback.push(`저탄소 친환경 미션 완벽 성공! 육류 없이 [두부]로 든든한 식단을 짰어요! 🌱 (+30점)`);
                 } else if (!hasMeat) {
                     roundScore += 20; 
-                    ruleFeedback.push(`친환경 미션 성공! 고기 없는 식단을 구성했어요. 두부까지 있었다면 완벽했을 텐데요! 🌱 (+20점)`);
+                    ruleFeedback.push(`친환경 미션 성공! 육류 없는 식단을 구성했어요. 두부까지 있었다면 완벽했을 텐데요! 🌱 (+20점)`);
                 } else if (allUsedIngredients.includes('두부')) {
                      roundScore += 10;
                      ruleFeedback.push(`[두부]를 사용했지만 육류가 포함되어 친환경 점수는 절반만 받았습니다. 다음엔 완벽한 채식에 도전해 보세요! 🌱 (+10점)`);
                 } else {
-                    ruleFeedback.push(`오늘은 저탄소 친환경 급식의 날! 고기 대신 채식을 시도했다면 더 좋았을 텐데 아쉬워요. 😭`);
+                    ruleFeedback.push(`오늘은 저탄소 친환경 급식의 날! 육류 대신 채식을 시도했다면 더 좋았을 텐데 아쉬워요. 😭`);
                 }
             } else if (gameState.currentEvent === 'birthday') {
                 if (allUsedIngredients.includes('미역')) {
@@ -1502,7 +1564,14 @@
                 if (ratio > maxRatio) { maxRatio = ratio; maxGroup = g; }
             });
 
-            let isPerfectBalance = actualData.every(ratio => ratio === 20);
+let isPerfectBalance = actualData.every(ratio => ratio === 20);
+
+gameState.missedGroupsStr = underFed.length > 0 ? underFed.map(g => getDisplayGroupName(g)).join(', ') : '없음';
+if (gameState.completedRounds > 0 && gameState.slotsToFillByUser > 1) {
+    gameState.avgSpeed = Math.round(totalPlayedSeconds / gameState.completedRounds);
+} else {
+    gameState.avgSpeed = 0;
+}
             let titleStr = "견습 영양사";
             
             if (gameState.slotsToFillByUser > 1) {
@@ -1566,25 +1635,74 @@
             if (gameState.slotsToFillByUser === 1) {
                 aiText = `수고하셨습니다, [${gameState.nickname}] 영양사님!<br><br>성공적으로 견습 과정을 훌륭히 마쳤습니다! 🎉<br>이제 <b>실전 난이도</b>로 넘어가 학생들을 위한 다양하고 완벽한 메뉴를 직접 구성해 볼까요?`;
             } else {
-                if (totalIngredients === 0) aiText += "아직 완성된 식단이 없습니다. 다음에는 더 적극적으로 배식에 참여해 보세요!";
-                else if (isPerfectBalance) aiText += "👏 놀랍습니다! 완벽한 황금 밸런스입니다! 5가지 식품군을 모두 적절한 비율(약 20%)로 골고루 배식하여 식품군을 균형 있게 골고루 섭취하도록 구성했습니다. 수석 영양사다운 최고의 식단 구성 능력입니다! ✨";
-                else if (underFed.length === 0 && overFed.length === 0) aiText += "👏 아주 훌륭합니다! 5가지 식품군을 골고루 배식하여 식품군을 균형 있게 골고루 섭취하도록 구성했습니다. 까다로운 미션 속에서도 균형을 잃지 않는 모습이 매우 인상적입니다!";
-                else {
-                    let underFedDisplay = underFed.map(g => getDisplayGroupName(g));
-                    let overFedDisplay = overFed.map(g => getDisplayGroupName(g));
-                    
-                    aiText += `📊 급식 총평: 전반적으로 훌륭한 시도였으나 밸런스가 조금 아쉽습니다. `;
-                    if (underFed.length > 0) aiText += `<br>📉 [${underFedDisplay.join(', ')}]의 섭취 비율이 권장량(20%)보다 부족했습니다. `;
-                    if (overFed.length > 0) aiText += `<br>📈 반면, [${overFedDisplay.join(', ')}]의 비율이 다소 높게 집중되어 나타났다. `;
-                    aiText += `<br><br>💡 AI의 조언: 다음 배식 때는 부족했던 식품군을 먼저 채우고, 넘쳤던 식품군을 줄여준다면 훨씬 건강하고 둥근 5각형 자전거 바퀴가 만들어질 것입니다! 🚀`;
+                if (totalIngredients === 0) {
+                    aiText += "아직 완성된 식단이 없습니다. 다음에는 더 적극적으로 배식에 참여해 보세요!";
+                } else {
+                    let missingGroups = labels.filter((g, index) => actualData[index] === 0);
+                    let severelyUnderFed = labels.filter((g, index) => actualData[index] > 0 && actualData[index] <= 10);
+                    let severelyOverFed = labels.filter((g, index) => actualData[index] >= 30);
+
+                    if (isPerfectBalance) {
+                        const perfectMsgs = [
+                            "👏 식품군을 모두 적절한 비율(20%)로 배분하여 완벽한 오각형을 만들었습니다. 수석 영양사다운 최고의 식단 구성 능력입니다! ✨",
+                            "🤩 식품구성자전거 바퀴가 완벽한 오각형을 그리고 있네요! 치우침 없이 식품군을 정확히 배분한 훌륭한 식단입니다! 💯",
+                            "🌟 모든 영양소가 오차 없이 딱 맞아떨어집니다. 학생들의 건강이 쑥쑥 자라나는 소리가 여기까지 들리는 완벽한 배식이었습니다! 🚀"
+                        ];
+                        aiText += perfectMsgs[Math.floor(Math.random() * perfectMsgs.length)];
+
+                    } else if (missingGroups.length > 0) {
+                        let underFedDisplay = underFed.map(g => getDisplayGroupName(g));
+                        let overFedDisplay = overFed.map(g => getDisplayGroupName(g));
+                        
+                        const missedMsgs = [
+                            `📊 <b>급식 총평:</b> 정성껏 준비한 식단이지만 완전히 빠진 식품군이 있어서 자전거 바퀴가 굴러가기 힘들어요. 😭`,
+                            `📊 <b>급식 총평:</b> 특정 영양소에 치우친 식단이 되었습니다. 건강하게 골고루 먹는 습관을 위해 다음엔 꼭 식품군을 모두 넣어주세요! 🧐`,
+                            `📊 <b>급식 총평:</b> 앗! 중요한 식품군이 아예 빠져버렸어요. 영양 불균형이 오지 않도록 조금 더 신경 써서 식판을 채워볼까요? 🌱`
+                        ];
+                        
+                        aiText += missedMsgs[Math.floor(Math.random() * missedMsgs.length)];
+                        
+                        if (underFed.length > 0) aiText += `<br>📉 특히 [${underFedDisplay.join(', ')}]의 섭취가 부족했습니다. `;
+                        if (overFed.length > 0) aiText += `<br>📈 반면, [${overFedDisplay.join(', ')}]의 비율은 꽤 높게 집중되어 나타났네요. `;
+                        
+                        aiText += `<br><br>💡 <b>AI의 조언:</b> 빠진 식품군을 먼저 챙기는 연습을 해보세요!`;
+                    } else if (severelyUnderFed.length > 0 || severelyOverFed.length > 0) {
+                        const skewedMsgs = [
+                            "📊 <b>급식 총평:</b> 식품군을 모두 넣은 점은 정말 멋져요! 하지만 특정 영양소에 눈에 띄게 치우쳐 있네요. 밸런스에 조금 더 신경 써볼까요? 💪",
+                            "📊 <b>급식 총평:</b> 빠진 식품군은 없지만, 자전거 바퀴가 심하게 찌그러져 굴러가기 힘들어 보여요! 다음엔 황금 비율(20%)에 가깝게 맞춰보세요. 🧐",
+                            "📊 <b>급식 총평:</b> 훌륭한 시도입니다! 다만 몇몇 영양소가 너무 많거나 적게 들어갔어요. 비율 조절에 조금만 더 신경 쓰면 훌륭한 영양사가 될 거예요! 🎯"
+                        ];
+                        aiText += skewedMsgs[Math.floor(Math.random() * skewedMsgs.length)];
+                        
+                        aiText += `<br><br>💡 <b>상세 분석:</b> `;
+                        let advice = [];
+                        if (severelyUnderFed.length > 0) advice.push(`[${severelyUnderFed.map(g => getDisplayGroupName(g)).join(', ')}]의 비중이 꽤 부족했고,`);
+                        if (severelyOverFed.length > 0) advice.push(`[${severelyOverFed.map(g => getDisplayGroupName(g)).join(', ')}]의 비중이 높았습니다.`);
+                        aiText += advice.join(' ') + " 이 부분들을 집중적으로 조절해 보세요!";
+                    } else {
+                        const goodButFlawedMsgs = [
+                            "👍 <b>급식 총평:</b> 거의 완벽에 가까운 훌륭한 밸런스입니다! 비율이 살짝 찌그러지긴 했지만 건강하고 준수한 식단이에요. 😉",
+                            "✨ <b>급식 총평:</b> 아주 좋습니다! 식품군을 골고루 챙겼고 비율도 꽤 안정적이에요. 완벽한 황금 비율까지 정말 얼마 남지 않았네요! 🚀",
+                            "👏 <b>급식 총평:</b> 밸런스를 아주 잘 맞췄어요! 특정 영양소가 아주 살짝 높긴 하지만, 이 정도면 학생들도 아주 건강하게 먹었을 거예요! 💯"
+                        ];
+                        aiText += goodButFlawedMsgs[Math.floor(Math.random() * goodButFlawedMsgs.length)];
+
+                        if (underFed.length > 0 || overFed.length > 0) {
+                            aiText += `<br><br>💡 <b>살짝 아쉬운 점:</b> `;
+                            let advice = [];
+                            if (underFed.length > 0) advice.push(`[${underFed.map(g => getDisplayGroupName(g)).join(', ')}] 비중을 쪼~금만 늘리고,`);
+                            if (overFed.length > 0) advice.push(`[${overFed.map(g => getDisplayGroupName(g)).join(', ')}] 비중을 쪼~금만 줄이면`);
+                            aiText += advice.join(' ') + " 더 완벽해질 거예요!";
+                        }
+                    }
                 }
 
                 if (gameState.completedRounds > 0 && gameState.slotsToFillByUser > 1) {
                     const avgSpeed = totalPlayedSeconds / gameState.completedRounds;
                     let speedComment = "";
                     if (avgSpeed <= 15) speedComment = `일차 당 평균 ${Math.round(avgSpeed)}초! 패스트푸드점을 차려도 될 엄청난 스피드입니다 ⚡`;
-                    else if (avgSpeed <= 30) speedComment = `일차 당 평균 ${Math.round(avgSpeed)}초! 빠르고 정확한 손놀림을 보여주셨네요 🏃‍♂️`;
-                    else if (avgSpeed <= 50) speedComment = `일차 당 평균 ${Math.round(avgSpeed)}초! 안정적이고 꼼꼼한 페이스로 훌륭하게 배식했습니다 👍`;
+                    else if (avgSpeed <= 30) speedComment = `일차 당 평균 ${Math.round(avgSpeed)}초! 빠른 손놀림을 보여주셨네요 🏃‍♂️`;
+                    else if (avgSpeed <= 50) speedComment = `일차 당 평균 ${Math.round(avgSpeed)}초! 안정적이고 꼼꼼한 페이스로 배식했습니다 👍`;
                     else speedComment = `일차 당 평균 ${Math.round(avgSpeed)}초! 재료 하나하나 정성을 다해 고민하는 신중파 영양사님이시군요! 🧐`;
                     
                     aiText += `<br><br>⏱️ <b>배식 속도 분석:</b> ${speedComment}`;
@@ -1594,48 +1712,36 @@
             document.getElementById('dash-ai-insight').innerHTML = aiText;
         }
 
-        function downloadReportPNG() {
-            const q1 = document.getElementById('q1-text').value.trim();
-            const q2 = document.getElementById('q2-text').value.trim();
-            const q3 = document.getElementById('q3-text').value.trim();
-            const understanding = document.querySelector('input[name="understanding"]:checked');
-            const immersionScore = document.getElementById('immersion-score').value;
+function downloadReportPNG() {
+    const q1 = document.getElementById('q1-text').value.trim();
+    const q2 = document.getElementById('q2-text').value.trim();
+    const q3 = document.getElementById('q3-text').value.trim();
+    const understanding = document.querySelector('input[name="understanding"]:checked');
+    const immersionScore = document.getElementById('immersion-score').value;
 
-            if (!q1 || !q2 || !q3 || !understanding || immersionScore === "0") {
-                showAlert("리포트를 저장하기 전에 '탐구 및 성찰 리포트'의 모든 문항과<br>자기평가를 완료해주세요!");
-                return;
-            }
+    if (!q1 || !q2 || !q3 || !understanding || immersionScore === "0") {
+        showAlert("리포트를 저장하기 전에 '탐구 및 성찰 리포트'의 모든 문항과<br>자기평가를 완료해주세요!");
+        return;
+    }
 
-            const app = document.getElementById('app');
-            const dashboard = document.getElementById('dashboard-screen');
-            const controls = document.querySelector('.print-controls');
-            
-            const appOriginalHeight = app.style.height || '';
-            const appOriginalOverflow = app.style.overflow || '';
-            const dashOriginalHeight = dashboard.style.height || '';
-            const dashOriginalOverflow = dashboard.style.overflow || '';
-            
-            controls.style.display = 'none';
-            app.style.height = 'auto';
-            app.style.overflow = 'visible';
-            dashboard.style.height = 'auto';
-            dashboard.style.overflow = 'visible';
-            
-            setTimeout(() => {
-                html2canvas(dashboard, { scale: 2, backgroundColor: '#ffffff', scrollY: -window.scrollY }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `급식_리포트_${gameState.nickname}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    
-                    app.style.height = appOriginalHeight;
-                    app.style.overflow = appOriginalOverflow;
-                    dashboard.style.height = dashOriginalHeight;
-                    dashboard.style.overflow = dashOriginalOverflow;
-                    controls.style.display = 'flex';
-                });
-            }, 100);
-        }
+    const app = document.getElementById('app');
+    const dashboard = document.getElementById('dashboard-screen');
+
+    dashboard.classList.add('print-mode');
+    
+    window.scrollTo(0, 0);
+
+    setTimeout(() => {
+        html2canvas(dashboard, { scale: 2, backgroundColor: '#ffffff', scrollY: 0 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `급식_리포트_${gameState.nickname}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            dashboard.classList.remove('print-mode');
+        });
+    }, 200); 
+}
 
         function submitToTeacher() {
             if (gameState.isSubmitted) {
@@ -1662,43 +1768,37 @@
             submitBtn.style.boxShadow = '0 5px 0 #7a828b';
             submitBtn.disabled = true;
 
-            const app = document.getElementById('app');
-            const dashboard = document.getElementById('dashboard-screen');
-            const controls = document.querySelector('.print-controls');
-            
-            const appOriginalHeight = app.style.height || '';
-            const appOriginalOverflow = app.style.overflow || '';
-            const dashOriginalHeight = dashboard.style.height || '';
-            const dashOriginalOverflow = dashboard.style.overflow || '';
-            
-            controls.style.display = 'none';
-            app.style.height = 'auto'; app.style.overflow = 'visible';
-            dashboard.style.height = 'auto'; dashboard.style.overflow = 'visible';
+    const app = document.getElementById('app');
+    const dashboard = document.getElementById('dashboard-screen');
 
-            setTimeout(() => {
-                html2canvas(dashboard, { scale: 2, backgroundColor: '#ffffff', scrollY: -window.scrollY }).then(canvas => {
-                    const base64Image = canvas.toDataURL('image/png');
+    dashboard.classList.add('print-mode');
 
-                    const reportData = {
-                        studentName: gameState.nickname,
-                        teacherEmail: gameState.teacherEmail, 
-                        sheetId: gameState.sheetId, 
-                        difficulty: document.getElementById('dash-difficulty').innerText, 
-                        score: gameState.totalScore,
-                        rounds: gameState.completedRounds,
-                        title: document.getElementById('dash-title').innerText,
-                        q1: q1, q2: q2, q3: q3,
-                        immersion: immersionScore, 
-                        understanding: understanding.value,
-                        imageData: base64Image, 
-                        timestamp: new Date().toLocaleString('ko-KR')
-                    };
-                    
-                    app.style.height = appOriginalHeight; app.style.overflow = appOriginalOverflow;
-                    dashboard.style.height = dashOriginalHeight; dashboard.style.overflow = dashOriginalOverflow;
-                    controls.style.display = 'flex';
+    window.scrollTo(0, 0);
 
-                    const CENTRAL_GAS_URL = 'https://script.google.com/macros/s/AKfycbydW0q3FFf6vaxPZuqEzlINvNxpJ6Z3SaEiPNOvXxsyVKfkHEx4D9ltebluQjLsjmNF7g/exec'; 
+    setTimeout(() => {
+        html2canvas(dashboard, { scale: 2, backgroundColor: '#ffffff', scrollY: 0 }).then(canvas => {
+            const base64Image = canvas.toDataURL('image/png');
+
+            const reportData = {
+                studentName: gameState.nickname,
+                teacherEmail: gameState.teacherEmail, 
+                sheetId: gameState.sheetId, 
+                difficulty: document.getElementById('dash-difficulty').innerText, 
+                score: gameState.totalScore,
+                rounds: gameState.completedRounds,
+                title: document.getElementById('dash-title').innerText,
+                q1: q1, q2: q2, q3: q3,
+                immersion: immersionScore, 
+                understanding: understanding.value,
+                avgSpeed: gameState.avgSpeed, 
+                missedGroups: gameState.missedGroupsStr,
+                imageData: base64Image, 
+                timestamp: new Date().toLocaleString('ko-KR')
+            };
+
+            dashboard.classList.remove('print-mode');
+
+            const CENTRAL_GAS_URL = 'https://script.google.com/macros/s/AKfycbydW0q3FFf6vaxPZuqEzlINvNxpJ6Z3SaEiPNOvXxsyVKfkHEx4D9ltebluQjLsjmNF7g/exec'; 
 
                     fetch(CENTRAL_GAS_URL, { 
                         method: 'POST', 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>좋은 급식 위대한 급식</title>
+    <title>맛난 급식 건강한 급식</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
@@ -316,6 +316,39 @@
         .btn-red { background-color:  #e86868; box-shadow: 0 5px 0 #c0392b; }
         .btn-blue { background-color: #57A1DE; box-shadow: 0 5px 0 #3a7db8; }
         .btn-white { background-color: #ffffff; color:  #e86868; border: 3px solid  #e86868; box-shadow: 0 5px 0  #e86868; font-weight: bold; }
+        #countdown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            border-radius: 20px;
+        }
+        .countdown-text {
+            font-size: clamp(1.8rem, 4vh, 2.8rem);
+            margin-bottom: 20px;
+            color: #ffffff; 
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+        }
+        .countdown-number {
+            font-size: clamp(5rem, 15vh, 8rem);
+            color: #ffffff; 
+            font-weight: bold;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            animation: countPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes countPop {
+            0% { opacity: 0; transform: scale(2.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -438,12 +471,16 @@
     <button id="fullscreen-toggle" class="fullscreen-btn" onclick="toggleFullScreen()">⛶ 전체화면</button>
 
     <div id="app">
+        <div id="countdown-overlay" class="hidden">
+            <div class="countdown-text">🍽️ 급식 시간이 다가옵니다...</div>
+            <div id="countdown-num" class="countdown-number">3</div>
+        </div>
+
         <div id="intro-screen">
             <button class="settings-btn" onclick="openSettings()">⚙️</button>
-            
             <h1>
-                <span class="title-small">좋은 급식</span><br>
-                <span class="title-large">위대한 급식</span>
+                <span class="title-small">맛난 급식</span><br>
+                <span class="title-large">건강한 급식</span>
             </h1>
             
             <div class="intro-controls">
@@ -897,7 +934,7 @@ function confirmHome() {
 
         function showFullscreenQR() { document.getElementById('qr-fullscreen').classList.remove('hidden'); }
 
-        function startGame() {
+function startGame() {
             const nickname = document.getElementById('player-nickname').value.trim();
             if (!nickname) { showAlert('별명을 입력해주세요!'); return; }
 
@@ -912,10 +949,30 @@ function confirmHome() {
             gameState.timeLeft = gameState.totalTimeLimit;
 
             document.getElementById('intro-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
+            const overlay = document.getElementById('countdown-overlay');
+            const numEl = document.getElementById('countdown-num');
+            overlay.classList.remove('hidden');
             
-            startRound();
-            startTimer();
+            let count = 3;
+            numEl.innerText = count;
+
+            const countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    numEl.innerText = count;
+
+                    numEl.style.animation = 'none';
+                    void numEl.offsetWidth;
+                    numEl.style.animation = 'countPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+                    
+                } else {
+                    clearInterval(countInterval);
+                    overlay.classList.add('hidden'); 
+                    document.getElementById('game-screen').classList.remove('hidden');
+                    startRound();
+                    startTimer();
+                }
+            }, 1000);
         }
 
         function startRound() {

@@ -802,6 +802,8 @@ let gameState = {
     missedGroupsStr: '' 
 };
 
+let balanceChartInstance = null;
+
         function extractSheetId(url) {
             const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
             return match ? match[1] : null;
@@ -1717,9 +1719,13 @@ if (gameState.completedRounds > 0 && gameState.slotsToFillByUser > 1) {
             }
 
             const chartLabels = labels.map(g => getDisplayGroupName(g));
-
             const ctx = document.getElementById('balance-chart').getContext('2d');
-            new Chart(ctx, {
+            
+            if (balanceChartInstance) {
+                balanceChartInstance.destroy();
+            }
+.
+            balanceChartInstance = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: chartLabels,

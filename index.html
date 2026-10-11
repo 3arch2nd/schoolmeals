@@ -1812,25 +1812,22 @@ if (gameState.completedRounds > 0 && gameState.slotsToFillByUser > 1) {
                     aiText += `<br><br>⏱️ <b>배식 속도 분석:</b> ${speedComment}`;
                 }
             }
-            
-            // 💡 기존 html 코드 내 showDashboard() 함수의 마지막 부분 (aiText 생성 로직 위치)을 아래 코드로 대체합니다.
 
 document.getElementById('dash-ai-insight').innerHTML = "⏳ AI 영양사 선생님이 식단을 분석하고 있어요...";
 
 async function fetchAIFeedback() {
-    // 💡 기존에 정의해두신 중앙 GAS URL을 호출합니다. (URL 문자열이 맞는지 다시 한번 확인해 주세요)
     const CENTRAL_GAS_URL = 'https://script.google.com/macros/s/AKfycbydW0q3FFf6vaxPZuqEzlINvNxpJ6Z3SaEiPNOvXxsyVKfkHEx4D9ltebluQjLsjmNF7g/exec';
 
-    const prompt = `너는 유쾌하고 다정한 초등학교 영양사 선생님이야. 
+const prompt = `너는 유쾌하고 다정한 초등학교 영양사 선생님이야. 
     학생 이름: ${gameState.nickname}, 획득 점수: ${gameState.totalScore}점.
     학생이 구성한 식단의 영양소 실제 비율: 곡류 ${actualData[0]}%, 단백질 ${actualData[1]}%, 채소 ${actualData[2]}%, 과일 ${actualData[3]}%, 유제품 ${actualData[4]}%.
     부족했던 식품군: ${underFed.length > 0 ? underFed.map(g => getDisplayGroupName(g)).join(', ') : '없음'}.
-    이 데이터를 바탕으로, 학생이 이해하기 쉽게 다정한 칭찬과 뼈있는 조언을 3~4문장으로 짧게 해줘. 친근한 이모지도 적극적으로 사용해줘!`;
+    (가장 중요: 이 수업에서는 5가지 식품군이 각각 20%씩 배분된 상태가 가장 이상적인 '황금 비율'입니다. 학생이 모든 식품군을 20%씩 맞췄다면 무조건 완벽한 식단을 짰다며 온전히 칭찬만 해주세요.)
+    이 데이터를 바탕으로, 학생이 이해하기 쉽게 다정한 칭찬과 조언을 3~4문장으로 짧게 해줘.`;
 
     try {
         const response = await fetch(CENTRAL_GAS_URL, {
             method: 'POST',
-            // 백엔드의 doPost로 action 플래그와 프롬프트를 함께 보냅니다.
             body: JSON.stringify({ 
                 action: "getAIFeedback", 
                 prompt: prompt 
@@ -1846,9 +1843,67 @@ async function fetchAIFeedback() {
         } else {
             throw new Error(data.message || "서버 통신 에러");
         }
-    } catch (error) {
+} catch (error) {
         console.error("AI 피드백 오류:", error);
-        document.getElementById('dash-ai-insight').innerHTML = "네트워크가 혼잡해서 AI 영양사 선생님의 답변을 불러오지 못했어요! 그래도 훌륭한 식단이었습니다!";
+        let fallbackText = `수고하셨습니다, [${gameState.nickname}] 영양사님! 총 ${gameState.completedRounds}번의 배식을 완료하며 학생들의 건강을 책임졌습니다.<br><br>`;
+        
+        let missingGroups = labels.filter((g, index) => actualData[index] === 0);
+        let severelyUnderFed = labels.filter((g, index) => actualData[index] > 0 && actualData[index] <= 10);
+        let severelyOverFed = labels.filter((g, index) => actualData[index] >= 30);
+
+        if (isPerfectBalance) {
+            const perfectMsgs = [
+                "👏 식품군을 모두 적절한 비율(20%)로 배분하여 완벽한 오각형을 만들었습니다. 수석 영양사다운 최고의 식단 구성 능력입니다! ✨",
+                "🤩 식품구성자전거 바퀴가 완벽한 오각형을 그리고 있네요! 치우침 없이 식품군을 정확히 배분한 훌륭한 식단입니다! 💯",
+                "🌟 모든 영양소가 오차 없이 딱 맞아떨어집니다. 학생들의 건강이 쑥쑥 자라나는 소리가 여기까지 들리는 완벽한 배식이었습니다! 🚀"
+            ];
+            fallbackText += perfectMsgs[Math.floor(Math.random() * perfectMsgs.length)];
+
+        } else if (missingGroups.length > 0) {
+            let underFedDisplay = underFed.map(g => getDisplayGroupName(g));
+            let overFedDisplay = overFed.map(g => getDisplayGroupName(g));
+            const missedMsgs = [
+                `📊 <b>급식 총평:</b> 정성껏 준비한 식단이지만 완전히 빠진 식품군이 있어서 자전거 바퀴가 굴러가기 힘들어요. 😭`,
+                `📊 <b>급식 총평:</b> 특정 영양소에 치우친 식단이 되었습니다. 건강하게 골고루 먹는 습관을 위해 다음엔 꼭 식품군을 모두 넣어주세요! 🧐`,
+                `📊 <b>급식 총평:</b> 앗! 중요한 식품군이 아예 빠져버렸어요. 영양 불균형이 오지 않도록 조금 더 신경 써서 식판을 채워볼까요? 🌱`
+            ];
+            fallbackText += missedMsgs[Math.floor(Math.random() * missedMsgs.length)];
+            
+            if (underFed.length > 0) fallbackText += `<br>📉 특히 [${underFedDisplay.join(', ')}]의 섭취가 부족했습니다. `;
+            if (overFed.length > 0) fallbackText += `<br>📈 반면, [${overFedDisplay.join(', ')}]의 비율은 꽤 높게 집중되어 나타났네요. `;
+            fallbackText += `<br><br>💡 <b>조언:</b> 빠진 식품군을 먼저 챙기는 연습을 해보세요!`;
+
+        } else if (severelyUnderFed.length > 0 || severelyOverFed.length > 0) {
+            const skewedMsgs = [
+                "📊 <b>급식 총평:</b> 식품군을 모두 넣은 점은 정말 멋져요! 하지만 특정 영양소에 눈에 띄게 치우쳐 있네요. 밸런스에 조금 더 신경 써볼까요? 💪",
+                "📊 <b>급식 총평:</b> 빠진 식품군은 없지만, 자전거 바퀴가 심하게 찌그러져 굴러가기 힘들어 보여요! 다음엔 황금 비율(20%)에 가깝게 맞춰보세요. 🧐",
+                "📊 <b>급식 총평:</b> 훌륭한 시도입니다! 다만 몇몇 영양소가 너무 많거나 적게 들어갔어요. 비율 조절에 조금만 더 신경 쓰면 훌륭한 영양사가 될 거예요! 🎯"
+            ];
+            fallbackText += skewedMsgs[Math.floor(Math.random() * skewedMsgs.length)];
+            
+            fallbackText += `<br><br>💡 <b>상세 분석:</b> `;
+            let advice = [];
+            if (severelyUnderFed.length > 0) advice.push(`[${severelyUnderFed.map(g => getDisplayGroupName(g)).join(', ')}]의 비중이 꽤 부족했고,`);
+            if (severelyOverFed.length > 0) advice.push(`[${severelyOverFed.map(g => getDisplayGroupName(g)).join(', ')}]의 비중이 높았습니다.`);
+            fallbackText += advice.join(' ') + " 이 부분들을 집중적으로 조절해 보세요!";
+
+        } else {
+            const goodButFlawedMsgs = [
+                "👍 <b>급식 총평:</b> 거의 완벽에 가까운 훌륭한 밸런스입니다! 비율이 살짝 찌그러지긴 했지만 건강하고 준수한 식단이에요. 😉",
+                "✨ <b>급식 총평:</b> 아주 좋습니다! 식품군을 골고루 챙겼고 비율도 꽤 안정적이에요. 완벽한 황금 비율까지 정말 얼마 남지 않았네요! 🚀",
+                "👏 <b>급식 총평:</b> 밸런스를 아주 잘 맞췄어요! 특정 영양소가 아주 살짝 높긴 하지만, 이 정도면 학생들도 아주 건강하게 먹었을 거예요! 💯"
+            ];
+            fallbackText += goodButFlawedMsgs[Math.floor(Math.random() * goodButFlawedMsgs.length)];
+
+            if (underFed.length > 0 || overFed.length > 0) {
+                fallbackText += `<br><br>💡 <b>살짝 아쉬운 점:</b> `;
+                let advice = [];
+                if (underFed.length > 0) advice.push(`[${underFed.map(g => getDisplayGroupName(g)).join(', ')}] 비중을 쪼~금만 늘리고,`);
+                if (overFed.length > 0) advice.push(`[${overFed.map(g => getDisplayGroupName(g)).join(', ')}] 비중을 쪼~금만 줄이면`);
+                fallbackText += advice.join(' ') + " 더 완벽해질 거예요!";
+            }
+        }
+        document.getElementById('dash-ai-insight').innerHTML = `👨‍🍳 <b>[영양사 선생님의 총평 (로컬 분석)]</b><br><br>${fallbackText}`;
     }
 }
 

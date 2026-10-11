@@ -660,17 +660,14 @@
             </div>
         </div>
 
-        <!-- --- [수정할 HTML 덩어리: id="dashboard-screen" 내부 전체 교체] --- -->
 <div id="dashboard-screen" class="hidden">
     <div class="report-header">
         <h2>📋 급식 일일 운영 보고서</h2>
         <p>👨‍🍳 담당 영양사: <span id="dash-name"></span></p>
     </div>
     
-    <!-- 💡 여기서부터 컨테이너를 두 개(좌/우)로 나눕니다 -->
     <div class="dashboard-layout">
         
-        <!-- 1단 (좌측 컨테이너) -->
         <div class="dashboard-col left-col">
             <div class="card">
                 <h3>🏆 종합 업무 요약</h3>
@@ -692,7 +689,6 @@
             </div>
         </div>
 
-        <!-- 2단 (우측 컨테이너) -->
         <div class="dashboard-col right-col">
             <div class="card">
                 <h3>💡 AI 급식 총평</h3>
@@ -1875,8 +1871,7 @@ async function fetchAIFeedback() {
 
         if (isPseudoBalanced) {
             if (!isReallyPerfect) {
-                // 💡 수정됨: 실패 횟수가 존재할 때의 로컬 텍스트도 조언 형태로 자연스럽게 수정
-                fallbackText += `🧐 <b>급식 총평:</b> 누적된 그래프는 예쁜 오각형이지만, 모든 배식이 완벽했던 건 아니네요! ${gameState.completedRounds}번 중 ${perfectCount}번만 완벽했어요. 다음에는 매 끼니마다 식품군을 골고루 챙기는 연습을 해보아요!`;
+                fallbackText += `🧐 <b>급식 총평:</b> 누적된 그래프는 예쁜 오각형이지만, 모든 배식이 완벽했던 건 아니네요! ${gameState.completedRounds}번 중 ${perfectCount}번만 완벽했어요. 다음에는 식품군을 골고루 챙기는 연습을 해보아요!`;
             } else {
                 fallbackText += `👏 <b>급식 총평:</b> 단 한 번의 실수도 없이 모든 배식을 황금 비율(20%)로 배분하여 완벽한 오각형을 만들었습니다. 수석 영양사다운 최고의 식단 구성 능력입니다!`;
             }

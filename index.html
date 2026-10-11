@@ -1829,17 +1829,17 @@ async function fetchAIFeedback() {
     const perfectCount = gameState.perfectRounds || 0;
 
     let isPseudoBalanced = actualData.every(ratio => ratio >= 15 && ratio <= 25);
-    let isReallyPerfect = perfectCount >= (gameState.completedRounds / 2);
+    let isReallyPerfect = (gameState.completedRounds > 0) && (perfectCount === gameState.completedRounds);
 
     let dynamicInstruction = "";
     if (isPseudoBalanced) {
         if (!isReallyPerfect) {
-            dynamicInstruction = `(가장 중요: 그래프 누적 비율은 20% 근처로 완벽해 보이지만, 실제 매 끼니를 완벽하게 맞춘 횟수는 ${perfectCount}번뿐입니다. "우연히 평균이 맞춰진 것"이라고 언급해 주세요.)`;
+            dynamicInstruction = `(가장 중요: 그래프 누적 비율은 20% 근처로 완벽해 보이지만, 실제 매 끼니를 완벽하게 맞춘 횟수는 ${gameState.completedRounds}번 중 ${perfectCount}번입니다. 모든 배식을 완벽하게 성공한 것은 아니므로, 부족했던 점에 대한 다정한 조언을 반드시 포함해 주세요.)`;
         } else {
-            dynamicInstruction = `(가장 중요: 비율도 완벽하고, 매 끼니를 골고루 챙긴 횟수도 높습니다. 아낌없이 칭찬해 주세요!)`;
+            dynamicInstruction = `(가장 중요: 비율도 완벽하고, 모든 배식을 단 한 번의 실수도 없이 완벽하게 성공했습니다. 칭찬만 해 주세요!)`;
         }
     } else {
-        dynamicInstruction = `(가장 중요: 현재 식단 비율이 불균형합니다. 20% 근처라는 말이나 우연히 맞췄다는 말은 절대 하지 마세요. 부족한 식품군을 정확히 짚어주며 다정하게 조언해 주세요.)`;
+        dynamicInstruction = `(가장 중요: 현재 식단 비율이 불균형합니다. 반드시 부족한 식품군을 정확히 짚어주며 다정하게 조언해 주세요.)`;
     }
 
     const prompt = `너는 유쾌하고 다정한 초등학교 영양사 선생님이야. 
@@ -1849,7 +1849,7 @@ async function fetchAIFeedback() {
     부족했던 식품군: ${underFed.length > 0 ? underFed.map(g => getDisplayGroupName(g)).join(', ') : '없음'}.
     
     ${dynamicInstruction}
-    이 데이터를 바탕으로, 영양사로 활동한 학생이 이해하기 쉽게 다정한 칭찬과 뼈있는 조언을 3~4문장으로 짧게 해줘.`;
+    이 데이터를 바탕으로, 영양사로 활동한 학생이 이해하기 쉽게 다정한 칭찬과 도움이 되는 조언을 3~4문장으로 짧게 해줘.`;
 
     try {
         const response = await fetch(CENTRAL_GAS_URL, {
@@ -1875,9 +1875,10 @@ async function fetchAIFeedback() {
 
         if (isPseudoBalanced) {
             if (!isReallyPerfect) {
-                fallbackText += `🧐 <b>급식 총평:</b> 겉보기엔 완벽한 오각형이지만 선생님은 속지 않아요! 우연히 비율이 맞았을 뿐, 영양 균형은 ${perfectCount}번 정도 신경 썼군요. 다음에는 식품군을 골고루 넣어 보아요!`;
+                // 💡 수정됨: 실패 횟수가 존재할 때의 로컬 텍스트도 조언 형태로 자연스럽게 수정
+                fallbackText += `🧐 <b>급식 총평:</b> 누적된 그래프는 예쁜 오각형이지만, 모든 배식이 완벽했던 건 아니네요! ${gameState.completedRounds}번 중 ${perfectCount}번만 완벽했어요. 다음에는 매 끼니마다 식품군을 골고루 챙기는 연습을 해보아요!`;
             } else {
-                fallbackText += `👏 <b>급식 총평:</b> 식품군을 모두 적절한 비율(20%)로 배분하여 완벽한 오각형을 만들었습니다. 수석 영양사다운 최고의 식단 구성 능력입니다! ✨`;
+                fallbackText += `👏 <b>급식 총평:</b> 단 한 번의 실수도 없이 모든 배식을 황금 비율(20%)로 배분하여 완벽한 오각형을 만들었습니다. 수석 영양사다운 최고의 식단 구성 능력입니다!`;
             }
         } else if (missingGroups.length > 0) {
             let underFedDisplay = underFed.map(g => getDisplayGroupName(g));

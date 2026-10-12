@@ -1004,7 +1004,7 @@ function startGame() {
 
             gameState.nickname = nickname;
             gameState.slotsToFillByUser = parseInt(document.getElementById('game-difficulty').value);
-            gameState.totalTimeLimit = parseInt(document.getElementById('play-time').value) * 60;
+            gameState.totalTimeLimit = parseInt(document.getElementById('playTime').value) * 60;
             gameState.timeLeft = gameState.totalTimeLimit;
 
             document.getElementById('intro-screen').classList.add('hidden');

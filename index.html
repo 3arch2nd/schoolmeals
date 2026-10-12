@@ -1591,7 +1591,7 @@ function evaluateTray() {
                     let nutrientDesc = "";
                     if (g === '곡류') nutrientDesc = "에너지를 내는 '탄수화물' 영양소가 부족해져요!";
                     else if (g === '고기·생선·달걀·콩류') nutrientDesc = "에너지를 내고 우리 몸을 구성하는 '단백질' 영양소가 부족해져요!";
-                    else if (g === '채소류' || g === '과일류') nutrientDesc = "몸의 기능을 조절하는 '비타민과 몸을 구성하고 기능을 조절하는 무기질'이 부족해져요!";
+                    else if (g === '채소류' || g === '과일류') nutrientDesc = "몸의 기능을 조절하는 '비타민'과 몸을 구성하고 기능을 조절하는 '무기질'이 부족해져요!";
                     else if (g === '우유·유제품류') nutrientDesc = "몸을 구성하고 기능을 조절하는 '무기질'이 부족해져요!";
                     return `[${getDisplayGroupName(g)}]이(가) 빠졌군요! 이 식품군이 없으면 ${nutrientDesc}`;
                 });

@@ -810,7 +810,9 @@ let gameState = {
     isSubmitted: false,
     eventCooldowns: { eco: 0, birthday: 0 },
     avgSpeed: 0, 
-    missedGroupsStr: '' 
+    missedGroupsStr: '',
+    totalMissedCount: 0,
+    missedHistory: []
 };
 
 let balanceChartInstance = null;
@@ -895,6 +897,8 @@ function confirmHome() {
     gameState.groupCounts = { '곡류': 0, '고기·생선·달걀·콩류': 0, '채소류': 0, '과일류': 0, '우유·유제품류': 0 };
     gameState.isSubmitted = false;
     gameState.eventCooldowns = { eco: 0, birthday: 0 };
+    gameState.totalMissedCount = 0; 
+    gameState.missedHistory = [];
 
     const submitBtn = document.getElementById('submit-teacher-btn');
     if (submitBtn) {
@@ -1580,6 +1584,9 @@ function evaluateTray() {
                 const missing = allGroups.filter(g => !usedGroups.has(g));
                 roundScore -= (missing.length * 10);
 
+                gameState.totalMissedCount += missing.length;
+                gameState.missedHistory.push(missing);
+                
                 const missingMsgs = missing.map(g => {
                     let nutrientDesc = "";
                     if (g === '곡류') nutrientDesc = "에너지를 내는 '탄수화물' 영양소가 부족해져요!";
@@ -1824,28 +1831,34 @@ async function fetchAIFeedback() {
 
     const perfectCount = gameState.perfectRounds || 0;
 
-    let isPseudoBalanced = actualData.every(ratio => ratio >= 15 && ratio <= 25);
+    let missedPatternStr = "누락 없음";
+    if (gameState.totalMissedCount > 0) {
+        let missedFlat = gameState.missedHistory.flat();
+        let uniqueMissed = [...new Set(missedFlat)];
+        if (uniqueMissed.length >= 3) {
+            missedPatternStr = "여러 식품군에서 불규칙하게 오답 발생 (감으로 선택하는 경향이 보임)";
+        } else if (uniqueMissed.length > 0) {
+            missedPatternStr = `[${uniqueMissed.map(g => getDisplayGroupName(g)).join(', ')}] 위주로 특정 식품군을 헷갈려하며 반복 누락함`;
+        }
+    }
+
     let isReallyPerfect = (gameState.completedRounds > 0) && (perfectCount === gameState.completedRounds);
 
     let dynamicInstruction = "";
-    if (isPseudoBalanced) {
-        if (!isReallyPerfect) {
-            dynamicInstruction = `(가장 중요: 그래프 누적 비율은 20% 근처로 완벽해 보이지만, 실제 매 끼니를 완벽하게 맞춘 횟수는 ${gameState.completedRounds}번 중 ${perfectCount}번입니다. 모든 배식을 완벽하게 성공한 것은 아니므로, 부족했던 점에 대한 다정한 조언을 반드시 포함해 주세요.)`;
-        } else {
-            dynamicInstruction = `(가장 중요: 비율도 완벽하고, 모든 배식을 단 한 번의 실수도 없이 완벽하게 성공했습니다. 칭찬만 해 주세요!)`;
-        }
+    if (isReallyPerfect && gameState.totalMissedCount === 0) {
+        dynamicInstruction = "(가장 중요: 단 한 번의 실수도 없이 모든 정답이 맞고 밸런스가 완벽합니다. 칭찬과 긍정적인 마무리로만 구성해 주세요!)";
     } else {
-        dynamicInstruction = `(가장 중요: 현재 식단 비율이 불균형합니다. 반드시 부족한 식품군을 정확히 짚어주며 다정하게 조언해 주세요.)`;
+        dynamicInstruction = `(가장 중요: 총 오답 횟수가 ${gameState.totalMissedCount}회 발생했습니다. 절대 칭찬으로만 끝내지 마세요. 학생의 오답 패턴이 '${missedPatternStr}'임을 참고하여, 이 패턴을 짚어주며 기초 개념을 다시 훑어보거나 특정 식품군을 신경 쓰라는 다정하고 예리한 피드백을 반드시 포함해 주세요.)`;
     }
 
     const prompt = `너는 유쾌하고 다정한 초등학교 영양사 선생님이야. 
     영양사로 활동한 학생 이름: ${gameState.nickname}, 획득 점수: ${gameState.totalScore}점.
     총 배식 횟수: ${gameState.completedRounds}번. 그 중 한 끼에 5식품군을 완벽히 배식한 횟수: ${perfectCount}번.
+    총 오답(누락) 횟수: ${gameState.totalMissedCount}번.
     학생이 배식한 전체 누적 영양소 비율: 곡류 ${actualData[0]}%, 단백질 ${actualData[1]}%, 채소 ${actualData[2]}%, 과일 ${actualData[3]}%, 유제품 ${actualData[4]}%.
-    부족했던 식품군: ${underFed.length > 0 ? underFed.map(g => getDisplayGroupName(g)).join(', ') : '없음'}.
     
     ${dynamicInstruction}
-    이 데이터를 바탕으로, 영양사로 활동한 학생이 이해하기 쉽게 다정한 칭찬과 도움이 되는 조언을 3~4문장으로 짧게 해줘.`;
+    이 데이터를 바탕으로, 영양사로 활동한 학생이 이해하기 쉽게 다정한 격려와 도움이 되는 조언을 3~4문장으로 짧게 해줘.`;
 
     try {
         const response = await fetch(CENTRAL_GAS_URL, {

@@ -528,11 +528,12 @@
             <div class="intro-controls">
                 <div class="input-group">
                     <input type="text" id="player-nickname" placeholder="이름 대신에 멋진 별명 적기!(최대 10자)" maxlength="10">
-                    <select id="play-time">
-                        <option value="1">총 플레이: 1분</option>
-                        <option value="3">총 플레이: 3분</option>
-                        <option value="5">총 플레이: 5분</option>
-                        <option value="10">총 플레이: 10분</option>
+<select name="playTime" id="playTime">
+    <option value="1">총 플레이: 1분</option>
+    <option value="3">총 플레이: 3분</option>
+    <option value="5" selected>총 플레이: 5분 (권장)</option>
+    <option value="10">총 플레이: 10분</option>
+</select>
 
                     </select>
                     <select id="game-difficulty">

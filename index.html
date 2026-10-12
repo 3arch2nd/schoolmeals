@@ -574,7 +574,7 @@
                         
                         <div id="sheet-guide" class="hidden" style="margin-top:10px; font-size:0.95rem; line-height:1.6; color:#576574; background:#fff; padding:15px; border-radius:10px; border:1px dashed #ced6e0; text-align:left;">
                             <strong>[설정 방법]</strong><br>
-                            1. 새 <a href="https://sheets.google.com" target="_blank" style="color:#57A1DE;">구글 스프레드시트</a>를 생성합니다.<br>
+                            1. <a href="http://sheets.new/" target="_blank" style="color:#57A1DE;">새 구글 스프레드시트</a>를 생성합니다.<br>
                             2. 우측 상단의 <b>[공유]</b> 버튼을 클릭합니다.<br>
                             3. 일반 액세스를 <b>'링크가 있는 모든 사용자'</b>로 변경하고, 권한을 <b>'편집자'</b>로 설정합니다. (매우 중요!)<br>
                             4. <b>[링크 복사]</b>를 눌러 복사한 주소를 위 빈칸에 붙여넣습니다.
@@ -749,21 +749,37 @@
         <button class="action-btn btn-white" onclick="askGoHome()">처음으로</button>
     </div>
 </div>
-
     <script>
-document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-document.addEventListener('dragstart', function(e) { e.preventDefault(); });
-document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+function isEditable(target) {
+    if (!target) return false;
+    const tagName = target.tagName.toLowerCase();
+    return tagName === 'input' || tagName === 'textarea' || target.isContentEditable;
+}
+
+document.addEventListener('contextmenu', function(e) { 
+    if (!isEditable(e.target)) e.preventDefault(); 
+});
+document.addEventListener('dragstart', function(e) { 
+    if (!isEditable(e.target)) e.preventDefault(); 
+});
+document.addEventListener('selectstart', function(e) { 
+    if (!isEditable(e.target)) e.preventDefault(); 
+});
 
 document.addEventListener('keydown', function(e) {
+
     if (e.keyCode === 123) { 
         e.preventDefault();
     }
+
     if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) { 
         e.preventDefault();
     }
+
     if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 83)) { 
-        e.preventDefault();
+        if (!isEditable(e.target)) {
+            e.preventDefault();
+        }
     }
 });
         function toggleFullScreen() {
